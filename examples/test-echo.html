@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  
+  <head>
+    <meta charset="utf-8" /> 
+    <title>io.js Test</title>
+    
+    <link rel="stylesheet" type="text/css" href="../ioterm.css">
+    <script src="../ioterm.js"></script>
+    
+    <style>
+      #output p {
+	  padding: 0px;
+	  margin: 0px;
+      }
+    </style>
+    
+  </head>
+  
+  
+  <body>
+    <div id="term" style="width: 500px; height: 400px; border: 1px solid #dddddd; float: left;">
+    </div>
+    
+    <div id="output" style="float: left; padding-left: 20px;">
+      <p><b>Sequence of inputs:</b></p>
+    </div>
+    
+    
+    <script>
+      
+      var tio = ioterm("term");
+      tio.printHTML ("<b><i>Console-like I/O widget</i></b><br><br>");
+      tio.print ("You can .print() to it");
+      tio.print ("And you can .prompt() from it");
+      
+      function loop () { 
+	return tio.prompt("> ", function(v) { 
+	  var e = document.getElementById("output");
+	  var t = document.createElement("p");
+	  t.appendChild(document.createTextNode(v));
+	  e.appendChild(t);
+	  if (v === "clear") { 
+	    tio.clear();
+	  } else {
+	    tio.print("You entered: "+v); 
+	  }
+	  return loop (); });
+      }
+      
+      loop();
+    </script>
+    
+  </body>
+</html> 

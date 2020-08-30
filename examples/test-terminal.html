@@ -1,0 +1,47 @@
+<!doctype html> 
+<html lang="en">
+<head>
+<meta charset="utf-8" /> 
+<title>ioterm.js Test</title>
+
+<link rel="stylesheet" type="text/css" href="../ioterm.css">
+<script src="../ioterm.js"></script>
+
+<style>
+body { 
+  background-color: black;
+  color: #00ff00;
+}
+</style>
+
+</head>
+<body>
+  <div id="term" style="width: 99vw; height: 95vh;">
+  </div>
+
+  <script>
+
+var tio = ioterm("term");
+tio.printHTML ("<b><i>Console-like I/O widget</i></b>");
+tio.print ("Full-ish screen demo and reasonable colors");
+
+function loop () { 
+  return tio.prompt("/home/happyturtle $ ", function(v) { 
+    if (v.trim() === "") {
+    } else if (v === "clear") { 
+      tio.clear();
+    } else if (v === "ls") {
+      tio.print ("42.txt    all-other-answers/");
+    } else if (v === "cat 42.txt") {
+      tio.print ("Ha! You wish...");
+    } else {
+      tio.print(v+": command not found");
+    }
+    return loop (); });
+}
+loop();
+
+  </script>
+
+</body>
+</html> 
