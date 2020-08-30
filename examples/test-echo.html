@@ -9,7 +9,7 @@
     <script src="../ioterm.js"></script>
     
     <style>
-      #output p {
+      #output pre {
 	  padding: 0px;
 	  margin: 0px;
       }
@@ -37,8 +37,8 @@
       function loop () { 
 	return tio.prompt("> ", function(v) { 
 	  var e = document.getElementById("output");
-	  var t = document.createElement("p");
-	  t.appendChild(document.createTextNode(v));
+	  var t = document.createElement("pre");
+	  t.appendChild(document.createTextNode('"' + v + '"'));
 	  e.appendChild(t);
 	  if (v === "clear") { 
 	    tio.clear();

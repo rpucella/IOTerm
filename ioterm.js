@@ -14,6 +14,13 @@ function ioterm (id, options) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
 
+  function updateLine (that, elt) {
+    //elt.innerHTML = clean(that.promptText + that.history[that.index].edit) + cursor;
+    elt.innerHTML = clean(that.promptText + that.history[that.index].edit.slice(0, that.position)) +
+      '<span style="color: white; background: red;">' + clean(that.history[that.index].edit[that.position]) + '</span>' +
+      clean(that.history[that.index].edit.slice(that.position + 1))
+  }
+
   function C () {
 
     var that = this;
@@ -21,8 +28,10 @@ function ioterm (id, options) {
     this.key_control = false;
     // need to handle this
     this.history = []
-    this.index = 0;    // index of where we are in the history
-    
+    this.index = null;    // index of where we are in the history
+
+    // alternative representation: editBefore, editAfter, with cursor always at the first elt of editAfter
+
     e.addEventListener('keypress', function(evt) {
       evt.preventDefault();
     });
@@ -47,15 +56,21 @@ function ioterm (id, options) {
             that.history[that.index].edit = that.history[that.index].original;
             that.index = 0;
           }
-          var input = that.history[that.index].edit;
+          // strip off the terminating space...
+          var input = that.history[that.index].edit.slice(0, that.history[that.index].edit.length - 1);
           var callback = that.promptCallback;
           that.disablePrompt();
           if (callback) { return callback(input); } 
         }
         else if (evt.key === 'Backspace') {
-          var len = that.history[that.index].edit.length;
-          that.history[that.index].edit = that.history[that.index].edit.slice(0, len - 1);
-          e.innerHTML = clean(that.promptText + that.history[that.index].edit) + cursor;
+          if (that.position > 0) { 
+            //var len = that.history[that.index].edit.length;
+            //that.history[that.index].edit = that.history[that.index].edit.slice(0, len - 1);
+            that.history[that.index].edit = that.history[that.index].edit.slice(0, that.position - 1) +
+              that.history[that.index].edit.slice(that.position);
+            that.position--;
+            updateLine(that, e);
+          }
         }
         else if (evt.key === 'Control') {
 	  that.key_control = true;
@@ -64,28 +79,70 @@ function ioterm (id, options) {
           // we got a control key - skip
           return;
         }
-        else if (that.key_control && evt.key.toLowerCase() === 'p') {
-          if (that.index < that.history.length - 1) { 
-            ///console.log('PREVIOUS');
-            that.index++;
-            e.innerHTML = clean(that.promptText + that.history[that.index].edit) + cursor;
+        else if (that.key_control) {
+          if (evt.key.toLowerCase() === 'p') {
+            if (that.index < that.history.length - 1) { 
+              that.index++;
+              that.position = that.history[that.index].edit.length - 1;   
+              updateLine(that, e);
+            }
           }
-        }
-        else if (that.key_control && evt.key.toLowerCase() === 'n') {
-          if (that.index > 0) { 
-            ///console.log('NEXT');
-            that.index--;
-            e.innerHTML = clean(that.promptText + that.history[that.index].edit) + cursor;
+          else if (evt.key.toLowerCase() === 'n') {
+            if (that.index > 0) { 
+              that.index--;
+              that.position = that.history[that.index].edit.length - 1;
+              updateLine(that, e);
+            }
+          }
+          else if (evt.key.toLowerCase() === 'b') {
+            if (that.position > 0) { 
+              that.position--;
+              updateLine(that, e);
+            }
+          }
+          else if (evt.key.toLowerCase() === 'f') {
+            if (that.position < that.history[that.index].edit.length - 1) { 
+              that.position++;
+              updateLine(that, e);
+            }
+          }
+          else if (evt.key.toLowerCase() === 'a') {
+            that.position = 0;
+            updateLine(that, e);
+          }
+          else if (evt.key.toLowerCase() === 'e') {
+            that.position = that.history[that.index].edit.length - 1;
+            updateLine(that, e);
+          }
+          else if (evt.key.toLowerCase() === 'k') {
+            that.history[that.index].edit = that.history[that.index].edit.slice(0, that.position) + ' ';
+            updateLine(that, e);
+          }
+          else if (evt.key.toLowerCase() === 'u') {
+            that.history[that.index].edit = that.history[that.index].edit.slice(that.position);
+            that.position = 0;
+            updateLine(that, e);
+          }
+          else if (evt.key.toLowerCase() === 'd') {
+            if (that.position < that.history[that.index].edit.length - 1) {
+              // don't bother deleting if we're at the terminal space
+              that.history[that.index].edit = that.history[that.index].edit.slice(0, that.position) +
+                that.history[that.index].edit.slice(that.position + 1);
+              updateLine(that, e);
+            }
           }
         }
         else { 
-          that.history[that.index].edit += evt.key;
-          e.innerHTML = clean(that.promptText + that.history[that.index].edit) + cursor;
+          ///that.history[that.index].edit += evt.key;
+          that.history[that.index].edit = that.history[that.index].edit.slice(0, that.position) + evt.key +
+            that.history[that.index].edit.slice(that.position);
+          that.position++;
+          updateLine(that, e)
         }
       }
     });
   }
-  
+
   C.prototype.print  = function (text) { 
     var p = document.createElement('p');
     p.innerText = text;
@@ -115,14 +172,19 @@ function ioterm (id, options) {
     }
     var p = document.createElement('p');
     p.classList.add('prompt');
-    p.innerHTML = clean(text) + cursor;
     this.element.appendChild(p);
+    ///p.innerHTML = clean(text) + cursor;
     // save originals
     this.history.forEach(function(entry) { entry.original = entry.edit });
     ///console.log(this.history);
-    this.history.unshift({edit: ''});
+    if (this.history.length === 0 || this.history[0].edit != ' ') {
+      // add a new entry if no history or last entry was empty
+      this.history.unshift({edit: ' '});
+    }
     this.index = 0;
+    this.position = 0;
     this.promptText = text;
+    updateLine(this, p);
     this.promptCallback = callback;
     this.element.scrollTop = this.element.scrollHeight;
     this.element.focus();
