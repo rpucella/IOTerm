@@ -1,5 +1,4 @@
 
-
 class IOTerm {
 
   constructor(id, options) {
@@ -145,6 +144,10 @@ class IOTerm {
 
   print (text) { 
     var p = document.createElement('p');
+    p.style.whiteSpace = 'pre-wrap';
+    p.style.fontFamily = 'monospace';
+    p.style.margin = '0px';
+    p.style.padding= '0px';
     p.innerText = text;
     this.element.appendChild(p);
     this.element.scrollTop = this.element.scrollHeight;
@@ -152,6 +155,10 @@ class IOTerm {
 
   printHTML (text) { 
     var p = document.createElement('p');
+    p.style.whiteSpace = 'pre-wrap';
+    p.style.fontFamily = 'monospace';
+    p.style.margin = '0px';
+    p.style.padding= '0px';
     p.innerHTML = text;
     this.element.appendChild(p);
     this.element.scrollTop = this.element.scrollHeight;
@@ -171,6 +178,10 @@ class IOTerm {
       return;
     }
     var p = document.createElement('p');
+    p.style.whiteSpace = 'pre-wrap';
+    p.style.fontFamily = 'monospace';
+    p.style.margin = '0px';
+    p.style.padding= '0px';
     p.classList.add('prompt');
     this.element.appendChild(p);
     ///p.innerHTML = this.clean(text) + cursor;
