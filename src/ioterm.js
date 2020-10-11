@@ -4,20 +4,33 @@ class IOTerm {
   constructor(id, options) {
     
     options = options || {}
-    const cursor = '<span class="cursor">&#x258d;</span>';
+    const cursor = '<span class="cursor">&#x258d;</span>'
   
-    const e = document.getElementById(id);
-    e.setAttribute('tabindex', '0');
-    e.style['overflow-y'] = 'scroll';
-    e.style['outline'] = 'none';
+    const e = document.getElementById(id)
+    e.setAttribute('tabindex', '0')
+    e.style['overflow-y'] = 'scroll'
+    e.style['outline'] = 'none'
 
     this.element = e;
-    // need to handle this
     this.history = []
-    this.index = null;    // index of where we are in the history
+    this.index = null    // index of where we are in the history
     
     // alternative representation: editBefore, editAfter, with cursor always at the first elt of editAfter
 
+    e.addEventListener('focusout', evt => {
+      if (this.history.length > 0) {
+	var e = this.element.querySelector('.prompt');
+	this.updateLine(e, 'grey')
+      }
+    })
+    
+    e.addEventListener('focusin', evt => {
+      if (this.history.length > 0) {
+	var e = this.element.querySelector('.prompt');
+	this.updateLine(e)
+      }
+    })
+    
     e.addEventListener('keydown', evt => { 
       evt.preventDefault();
       var e = this.element.querySelector('.prompt');
@@ -118,10 +131,10 @@ class IOTerm {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   }
 
-  updateLine (elt) {
-    //elt.innerHTML = this.clean(this.promptText + this.history[this.index].edit) + cursor;
+  updateLine (elt, cursorColor) {
+    cursorColor = cursorColor || 'red'
     elt.innerHTML = this.clean(this.promptText + this.history[this.index].edit.slice(0, this.position)) +
-      '<span style="color: white; background: red;">' + this.clean(this.history[this.index].edit[this.position]) + '</span>' +
+      `<span style="color: white; background: ${cursorColor};">` + this.clean(this.history[this.index].edit[this.position]) + '</span>' +
       this.clean(this.history[this.index].edit.slice(this.position + 1))
   }
 
