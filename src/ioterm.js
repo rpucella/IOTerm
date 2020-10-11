@@ -10,27 +10,14 @@ class IOTerm {
     e.setAttribute('tabindex', '0');
     e.style['overflow-y'] = 'scroll';
     e.style['outline'] = 'none';
-    e.classList.add('io');
 
     this.element = e;
-    this.key_control = false;
     // need to handle this
     this.history = []
     this.index = null;    // index of where we are in the history
     
     // alternative representation: editBefore, editAfter, with cursor always at the first elt of editAfter
 
-    e.addEventListener('keypress', evt => {
-      evt.preventDefault();
-    });
-    
-    e.addEventListener('keyup', evt => { 
-      evt.preventDefault();
-      if (evt.key === 'Control') {
-        this.key_control = false;
-      }
-    });
-    
     e.addEventListener('keydown', evt => { 
       evt.preventDefault();
       var e = this.element.querySelector('.prompt');
@@ -60,65 +47,61 @@ class IOTerm {
             this.updateLine(e);
           }
         }
-        else if (evt.key === 'Control') {
-	  this.key_control = true;
-        }
-        else if (evt.key.length > 1) {
-          // we got a control key - skip
-          return;
-        }
-        else if (this.key_control) {
-          if (evt.key.toLowerCase() === 'p') {
-            if (this.index < this.history.length - 1) { 
-              this.index++;
-              this.position = this.history[this.index].edit.length - 1;   
-              this.updateLine(e);
-            }
-          }
-          else if (evt.key.toLowerCase() === 'n') {
-            if (this.index > 0) { 
-              this.index--;
-              this.position = this.history[this.index].edit.length - 1;
-              this.updateLine(e);
-            }
-          }
-          else if (evt.key.toLowerCase() === 'b') {
-            if (this.position > 0) { 
-              this.position--;
-              this.updateLine(e);
-            }
-          }
-          else if (evt.key.toLowerCase() === 'f') {
-            if (this.position < this.history[this.index].edit.length - 1) { 
-              this.position++;
-              this.updateLine(e);
-            }
-          }
-          else if (evt.key.toLowerCase() === 'a') {
-            this.position = 0;
+        else if ((evt.ctrlKey && evt.key.toLowerCase() === 'p') || evt.key === 'ArrowUp') {
+          if (this.index < this.history.length - 1) { 
+            this.index++;
+            this.position = this.history[this.index].edit.length - 1;   
             this.updateLine(e);
           }
-          else if (evt.key.toLowerCase() === 'e') {
+        }
+        else if ((evt.ctrlKey && evt.key.toLowerCase() === 'n') || evt.key === 'ArrowDown') {
+          if (this.index > 0) { 
+            this.index--;
             this.position = this.history[this.index].edit.length - 1;
             this.updateLine(e);
           }
-          else if (evt.key.toLowerCase() === 'k') {
-            this.history[this.index].edit = this.history[this.index].edit.slice(0, this.position) + ' ';
+        }
+        else if ((evt.ctrlKey && evt.key.toLowerCase() === 'b') || evt.key === 'ArrowLeft') {
+          if (this.position > 0) { 
+            this.position--;
             this.updateLine(e);
           }
-          else if (evt.key.toLowerCase() === 'u') {
-            this.history[this.index].edit = this.history[this.index].edit.slice(this.position);
-            this.position = 0;
+        }
+        else if ((evt.ctrlKey && evt.key.toLowerCase() === 'f') || evt.key === 'ArrowRight') {
+          if (this.position < this.history[this.index].edit.length - 1) { 
+            this.position++;
             this.updateLine(e);
           }
-          else if (evt.key.toLowerCase() === 'd') {
-            if (this.position < this.history[this.index].edit.length - 1) {
-              // don't bother deleting if we're at the terminal space
-              this.history[this.index].edit = this.history[this.index].edit.slice(0, this.position) +
-                this.history[this.index].edit.slice(this.position + 1);
-              this.updateLine(e);
-            }
+        }
+        else if (evt.ctrlKey && evt.key.toLowerCase() === 'a') {
+          this.position = 0;
+          this.updateLine(e);
+        }
+        else if (evt.ctrlKey && evt.key.toLowerCase() === 'e') {
+          this.position = this.history[this.index].edit.length - 1;
+          this.updateLine(e);
+        }
+        else if (evt.ctrlKey && evt.key.toLowerCase() === 'k') {
+          this.history[this.index].edit = this.history[this.index].edit.slice(0, this.position) + ' ';
+          this.updateLine(e);
+        }
+        else if (evt.ctrlKey && evt.key.toLowerCase() === 'u') {
+          this.history[this.index].edit = this.history[this.index].edit.slice(this.position);
+          this.position = 0;
+          this.updateLine(e);
+        }
+        else if (evt.ctrlKey && evt.key.toLowerCase() === 'd') {
+          if (this.position < this.history[this.index].edit.length - 1) {
+            // don't bother deleting if we're at the terminal space
+            this.history[this.index].edit = this.history[this.index].edit.slice(0, this.position) +
+              this.history[this.index].edit.slice(this.position + 1);
+            this.updateLine(e);
           }
+        }
+        else if (evt.key.length > 1) {
+          // we got a control key - skip
+	  // TODO: is this safe?
+          return;
         }
         else { 
           ///this.history[this.index].edit += evt.key;
