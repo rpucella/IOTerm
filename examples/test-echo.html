@@ -4,9 +4,8 @@
   <head>
     <meta charset="utf-8" /> 
     <title>io.js Test</title>
-    
-    <link rel="stylesheet" type="text/css" href="../ioterm.css">
-    <script src="../ioterm.js"></script>
+
+    <script src="../src/ioterm.js"></script>
     
     <style>
       #output pre {
@@ -28,27 +27,29 @@
     
     
     <script>
-      
-      var tio = ioterm("term");
-      tio.printHTML ("<b><i>Console-like I/O widget</i></b><br><br>");
-      tio.print ("You can .print() to it");
-      tio.print ("And you can .prompt() from it");
+
+      const tio = new IOTerm('term')
+      tio.printHTML ("<b><i>Console-like I/O widget</i></b><br><br>")
+      tio.print ("You can .print() to it")
+      tio.print ("And you can .prompt() from it")
       
       function loop () { 
-	return tio.prompt("> ", function(v) { 
-	  var e = document.getElementById("output");
-	  var t = document.createElement("pre");
-	  t.appendChild(document.createTextNode('"' + v + '"'));
-	  e.appendChild(t);
+	return tio.prompt("> ", v => { 
+	  var e = document.getElementById("output")
+	  var t = document.createElement("pre")
+	  t.appendChild(document.createTextNode('"' + v + '"'))
+	  e.appendChild(t)
 	  if (v === "clear") { 
-	    tio.clear();
+	    tio.clear()
 	  } else {
-	    tio.print("You entered: "+v); 
+	    tio.print("You entered: "+v)
 	  }
-	  return loop (); });
+	  return loop ()
+	})
       }
       
-      loop();
+      loop()
+      
     </script>
     
   </body>
