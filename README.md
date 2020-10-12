@@ -21,14 +21,14 @@ In the Javascript of the page, you can then initialize a terminal by providing t
       tio.print ("And you can .prompt() from it")
       
       function loop () { 
-	return tio.prompt("> ", v => { 
-	  if (v === "clear") { 
-	    tio.clear()
-	  } else {
-	    tio.print("You entered: "+v)
-	  }
-	  return loop ()
-	})
+        return tio.prompt("> ", v => { 
+          if (v === "clear") { 
+            tio.clear()
+          } else {
+            tio.print("You entered: "+v)
+          }
+          return loop ()
+        })
       }
       
       loop()
